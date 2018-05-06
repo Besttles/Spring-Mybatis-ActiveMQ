@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bangi.logistics.mapper.LogisMapper" >
+
+	<!-- 保存MQ订单信息 -->
+	<insert id="saveLogis" parameterType="java.util.Map">
+		insert into logis_order
+		(order_id,create_time,submit_user_id,order_status,order_amount,order_depict,order_num)
+		values
+		(#{orderId},#{createTime},${submitUserId},#{orderStatus},${orderAmount},#{orderDepict},#{orderNum})
+	</insert>
+	
+	<!-- 查询所有物流订单信息 -->
+	<select id="findLogisOrder" resultType="java.util.Map">
+		select order_id,create_time,submit_user_id,order_status,order_num,order_amount,order_depict
+		from logis_order
+	</select>
+	
+	<!-- 根据ID查询物流详情信息 -->
+	<select id="findById" parameterType="java.util.Map" resultType="java.util.Map">
+		select * from logis_order
+		where order_id = #{orderId}
+	</select>
+	
+	<!-- 修改物流详情信息 -->
+	<update id="findByIdUpdateLogisDep" parameterType="java.util.Map">
+		update logis_order
+		set order_depict = #{orderDepict}
+		where order_id = #{orderId}
+	</update>
+	
+	<!-- 保存物流详情信息到logis_depict -->
+	<insert id="saveLogisticsDepict" parameterType="java.util.Map">
+		insert into logis_depict
+		(logistics_id, logistics_depict, logistics_update_time)
+		values
+		(#{orderId}, #{orderDepict}, #{createTime})
+	</insert>
+	
+	<!-- 查看物流详情信息 -->
+	<select id="findByIdLogisData" parameterType="java.util.Map" resultType="java.util.Map">
+		select logistics_id, logistics_update_time, logistics_depict 
+		from logis_depict
+		<where>
+			<if test="logisticsId != null and logisticsId != ''">
+			    logistics_id = #{logisticsId} 
+			</if>
+		</where>
+		group by logistics_id, logistics_update_time, logistics_depict
+		order by logistics_id, logistics_update_time desc
+	</select>
+	
+</mapper>

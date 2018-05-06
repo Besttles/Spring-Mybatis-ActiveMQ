@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.bangi.ssm.mapper.SsmMapper" >
+
+	<!-- 查询用户信息 -->
+	<select id="findUsers" resultType="java.util.Map">
+		select user_id,user_name from user_t
+	</select>
+
+	<!-- 查询商品信息 -->
+	<select id="findOrders" resultType="java.util.Map">
+		select goods_name,price,goods_desc from goods_t
+	</select>
+	
+	<!-- 查询我的订单信息 -->
+	<select id="findMyOrders" parameterType="java.util.Map" resultType="java.util.Map">
+		select order_id,create_time,order_status,order_amount from order_t
+		where is_delete!=1 or is_delete is null
+		<if test="submitUserId != null and userId != ''">
+			and submit_user_id=#{submitUserId}
+		</if>
+		<if test="sort != null and sort != ''">
+			order by create_time ${sort}
+		</if>
+	</select>
+	
+	
+	<!-- 购买商品 -->
+	<insert id="saveBuyData" parameterType="java.util.Map">
+		insert into order_t 
+		(order_id,create_time,submit_user_id,order_amount,order_status) values
+		(#{orderId},#{createTime},#{submitUserId},#{orderAmount},#{orderStatus})
+	</insert>
+	
+	<!-- 逻辑删除 -->
+	<update id="delOrder" parameterType="java.util.Map">
+		update order_t 
+		set is_delete = 1
+		where order_id = #{orderId}
+	</update>
+	
+	
+	
+	<!-- 根据当天日期查询当天种子号 -->
+	<select id="getSeedByDate" parameterType="java.util.Map" resultType="java.util.Map">
+		select * from order_seed_t where seed_date_str=#{seedDateStr}
+	</select>
+	
+	<!-- 当天第一笔订单种子号 -->
+	<insert id='saveSeed'  parameterType="java.util.Map" >
+	
+		INSERT INTO order_seed_t ( seed_date_str, seed_number) 
+		VALUES (#{seedDateStr},#{seedNumber})
+		
+	</insert>
+	
+	<!-- 更新种子号 -->
+	<update id="updateSeedByDate" parameterType="java.util.Map">
+		update  order_seed_t set seed_number = seed_number+1
+		where seed_date_str = #{seedDateStr}
+	</update>
+	
+	<!-- 查看提交MQ数据 -->
+	<select id="findSubMQData" parameterType="java.util.Map" resultType="java.util.Map">
+		select order_id,create_time,order_status,order_amount from order_t
+		where submit_user_id = #{userId}
+	</select>
+	
+	
+</mapper>
